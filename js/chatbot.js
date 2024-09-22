@@ -404,140 +404,225 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Create chatbot HTML structure
-const chatbotHTML = `
-    <div class="canarias-chatbot-overlay">
-      <div class="canarias-chatbot-overlay-text">
-        <div class="canarias-chatbot-overlay-close">
-          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/close.svg" alt="close" />
+async function init() {
+  try {
+    const response = await fetch(`http://67.207.80.190:2000/api/assistant`);
+    const data = await response.json();
+
+    let btnsText = "";
+
+    for (var i = 0; i < data.initialSuggestions.length; i++) {
+      if (data.initialSuggestions[i].enabled) {
+        btnsText =
+          btnsText +
+          "<button>" +
+          data.initialSuggestions[i].value +
+          "</button>";
+      }
+    }
+
+    // Create chatbot HTML structure
+    const chatbotHTML =
+      `
+<div class="canarias-chatbot-overlay">
+  <div class="canarias-chatbot-overlay-text">
+    <div class="canarias-chatbot-overlay-close">
+      <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/close.svg" alt="close" />
+    </div>
+    <div class="canarias-chatbot-desc">
+      <p>
+        ` +
+      data.welcomeMessage +
+      `
+      </p>
+    </div>
+    <img class="triangule" src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/arrow_white.svg" alt="arrow" />
+  </div>
+  <div class="canarias-chatbot-has-message">
+    <span>1</span>
+  </div>
+  <div class="canarias-chatbot-img">
+    <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
+  </div>
+</div>
+<div class="canarias-chatbot">
+  <div class="canarias-chatbot-header">
+    <div class="canarias-chatbot-dots">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+      >
+        <path
+          d="M6.66667 13.3333C5.2 13.3333 4 14.5333 4 16C4 17.4667 5.2 18.6667 6.66667 18.6667C8.13333 18.6667 9.33333 17.4667 9.33333 16C9.33333 14.5333 8.13333 13.3333 6.66667 13.3333Z"
+          fill="white"
+        />
+        <path
+          d="M25.3334 13.3333C23.8667 13.3333 22.6667 14.5333 22.6667 16C22.6667 17.4667 23.8667 18.6667 25.3334 18.6667C26.8001 18.6667 28.0001 17.4667 28.0001 16C28.0001 14.5333 26.8001 13.3333 25.3334 13.3333Z"
+          fill="white"
+        />
+        <path
+          d="M15.9999 13.3333C14.5333 13.3333 13.3333 14.5333 13.3333 16C13.3333 17.4667 14.5333 18.6667 15.9999 18.6667C17.4666 18.6667 18.6666 17.4667 18.6666 16C18.6666 14.5333 17.4666 13.3333 15.9999 13.3333Z"
+          fill="white"
+        />
+      </svg>
+    </div>
+    <div>Asistente Virtual</div>
+    <div class="canarias-chatbot-close">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+      >
+        <path
+          d="M9.6001 16H22.4001"
+          stroke="white"
+          stroke-width="2"
+          stroke-miterlimit="10"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+  </div>
+  <div class="canarias-chatbot-body">
+    <div class="canarias-chatbot-msg canarias-chatbot-initial">
+      <div class="canarias-chatbot-text">
+        <div class="canarias-chatbot-img">
+          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
         </div>
-        <div class="canarias-chatbot-desc">
-          <p>
-            Hola, soy Lucía, tu asistente virtual y compañera en tu aventura por
-            Gran Canaria. Estoy aquí para ofrecerte toda la información que
-            necesites sobre la isla. ¿En qué puedo ser de ayuda?
-          </p>
-        </div>
-        <img class="triangule" src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/arrow_white.svg" alt="arrow" />
+        <p>
+           ` +
+      data.welcomeMessage +
+      `
+        </p>
       </div>
-      <div class="canarias-chatbot-has-message">
-        <span>1</span>
-      </div>
-      <div class="canarias-chatbot-img">
-        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
+      <div class="canarias-chatbot-btns">
+       ` +
+      btnsText +
+      `
       </div>
     </div>
-    <div class="canarias-chatbot">
-      <div class="canarias-chatbot-header">
-        <div class="canarias-chatbot-dots">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-            fill="none"
-          >
-            <path
-              d="M6.66667 13.3333C5.2 13.3333 4 14.5333 4 16C4 17.4667 5.2 18.6667 6.66667 18.6667C8.13333 18.6667 9.33333 17.4667 9.33333 16C9.33333 14.5333 8.13333 13.3333 6.66667 13.3333Z"
-              fill="white"
-            />
-            <path
-              d="M25.3334 13.3333C23.8667 13.3333 22.6667 14.5333 22.6667 16C22.6667 17.4667 23.8667 18.6667 25.3334 18.6667C26.8001 18.6667 28.0001 17.4667 28.0001 16C28.0001 14.5333 26.8001 13.3333 25.3334 13.3333Z"
-              fill="white"
-            />
-            <path
-              d="M15.9999 13.3333C14.5333 13.3333 13.3333 14.5333 13.3333 16C13.3333 17.4667 14.5333 18.6667 15.9999 18.6667C17.4666 18.6667 18.6666 17.4667 18.6666 16C18.6666 14.5333 17.4666 13.3333 15.9999 13.3333Z"
-              fill="white"
-            />
-          </svg>
-        </div>
-        <div>Asistente Virtual</div>
-        <div class="canarias-chatbot-close">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            viewBox="0 0 32 32"
-            fill="none"
-          >
-            <path
-              d="M9.6001 16H22.4001"
-              stroke="white"
-              stroke-width="2"
-              stroke-miterlimit="10"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-      <div class="canarias-chatbot-body">
-        <div class="canarias-chatbot-msg canarias-chatbot-initial">
-          <div class="canarias-chatbot-text">
-            <div class="canarias-chatbot-img">
-              <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
-            </div>
-            <p>
-              Hola, soy Lucía, tu asistente virtual y compañera en tu aventura
-              por Gran Canaria. Estoy aquí para ofrecerte toda la información
-              que necesites sobre la isla. ¿En qué puedo ser de ayuda?
-            </p>
-          </div>
-          <div class="canarias-chatbot-btns">
-            <button>¿Qué hacer?</button>
-            <button>¿Qué visitar?</button>
-          </div>
-        </div>
-        <div class="canarias-chatbot-msg">
-          <div class="canarias-chatbot-text">
-            <p>
-              Al utilizarme, aceptas los términos de uso y la política de
-              privacidad de Gran Canaria. Ver:
-              <a href="#"
-                >https://www.grancanaria.com/turismo/soporte/aviso-legal/
-              </a>
-              y
-              <a href="#">
-                https://www.grancanaria.com/turismo/es/politica-de-privacidad/
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="canarias-chatbot-input">
-        <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje..." />
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="33"
-          height="32"
-          viewBox="0 0 33 32"
-          fill="none"
-        >
-          <path
-            d="M16.5 21.3333C19.4413 21.3333 21.8333 18.94 21.8333 16V8C21.8333 5.05867 19.4413 2.66667 16.5 2.66667C13.5586 2.66667 11.1666 5.05867 11.1666 8V16C11.1666 18.94 13.5586 21.3333 16.5 21.3333ZM25.8333 16V13.3333C25.8333 12.9797 25.6928 12.6406 25.4428 12.3905C25.1927 12.1405 24.8536 12 24.5 12C24.1463 12 23.8072 12.1405 23.5571 12.3905C23.3071 12.6406 23.1666 12.9797 23.1666 13.3333V16C23.1666 19.676 20.176 22.6667 16.5 22.6667C12.824 22.6667 9.83329 19.676 9.83329 16V13.3333C9.83329 12.9797 9.69282 12.6406 9.44277 12.3905C9.19272 12.1405 8.85358 12 8.49996 12C8.14634 12 7.8072 12.1405 7.55715 12.3905C7.3071 12.6406 7.16663 12.9797 7.16663 13.3333V16C7.16663 20.6933 10.6506 24.576 15.1666 25.2267V26.6667H11.1666C10.813 26.6667 10.4739 26.8071 10.2238 27.0572C9.97377 27.3072 9.83329 27.6464 9.83329 28C9.83329 28.3536 9.97377 28.6928 10.2238 28.9428C10.4739 29.1929 10.813 29.3333 11.1666 29.3333H21.8333C22.1869 29.3333 22.5261 29.1929 22.7761 28.9428C23.0262 28.6928 23.1666 28.3536 23.1666 28C23.1666 27.6464 23.0262 27.3072 22.7761 27.0572C22.5261 26.8071 22.1869 26.6667 21.8333 26.6667H17.8333V25.2267C22.3493 24.576 25.8333 20.6933 25.8333 16Z"
-            fill="#3A68B1"
-          />
-        </svg>
+    <div class="canarias-chatbot-msg">
+      <div class="canarias-chatbot-text">
+        <p>
+          ` +
+      convertUrlsToLinks(data.privacyAcceptanceMessage) +
+      `
+        </p>
       </div>
     </div>
+  </div>
+  <div class="canarias-chatbot-input">
+    <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje..." />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="33"
+      height="32"
+      viewBox="0 0 33 32"
+      fill="none"
+    >
+      <path
+        d="M16.5 21.3333C19.4413 21.3333 21.8333 18.94 21.8333 16V8C21.8333 5.05867 19.4413 2.66667 16.5 2.66667C13.5586 2.66667 11.1666 5.05867 11.1666 8V16C11.1666 18.94 13.5586 21.3333 16.5 21.3333ZM25.8333 16V13.3333C25.8333 12.9797 25.6928 12.6406 25.4428 12.3905C25.1927 12.1405 24.8536 12 24.5 12C24.1463 12 23.8072 12.1405 23.5571 12.3905C23.3071 12.6406 23.1666 12.9797 23.1666 13.3333V16C23.1666 19.676 20.176 22.6667 16.5 22.6667C12.824 22.6667 9.83329 19.676 9.83329 16V13.3333C9.83329 12.9797 9.69282 12.6406 9.44277 12.3905C9.19272 12.1405 8.85358 12 8.49996 12C8.14634 12 7.8072 12.1405 7.55715 12.3905C7.3071 12.6406 7.16663 12.9797 7.16663 13.3333V16C7.16663 20.6933 10.6506 24.576 15.1666 25.2267V26.6667H11.1666C10.813 26.6667 10.4739 26.8071 10.2238 27.0572C9.97377 27.3072 9.83329 27.6464 9.83329 28C9.83329 28.3536 9.97377 28.6928 10.2238 28.9428C10.4739 29.1929 10.813 29.3333 11.1666 29.3333H21.8333C22.1869 29.3333 22.5261 29.1929 22.7761 28.9428C23.0262 28.6928 23.1666 28.3536 23.1666 28C23.1666 27.6464 23.0262 27.3072 22.7761 27.0572C22.5261 26.8071 22.1869 26.6667 21.8333 26.6667H17.8333V25.2267C22.3493 24.576 25.8333 20.6933 25.8333 16Z"
+        fill="#3A68B1"
+      />
+    </svg>
+  </div>
+</div>
 `;
 
-// Append chatbot HTML to body
-document.body.insertAdjacentHTML("beforeend", chatbotHTML);
+    // Append chatbot HTML to body
+    document.body.insertAdjacentHTML("beforeend", chatbotHTML);
 
-// Get DOM elements
-const chatbotOverlay = document.querySelector(".canarias-chatbot-overlay");
-const chatbotText = document.querySelector(".canarias-chatbot-overlay-text");
-const chatbotCloseOverlay = document.querySelector(
-  ".canarias-chatbot-overlay-close"
-);
-const chatbot = document.querySelector(".canarias-chatbot");
-const chatbotBody = document.querySelector(".canarias-chatbot-body");
-const chatbotInput = document.getElementById("chatbot-input");
-const chatbotClose = document.querySelector(".canarias-chatbot-close");
+    // Get DOM elements
+    const chatbotOverlay = document.querySelector(".canarias-chatbot-overlay");
+    const chatbotText = document.querySelector(
+      ".canarias-chatbot-overlay-text"
+    );
+    const chatbotCloseOverlay = document.querySelector(
+      ".canarias-chatbot-overlay-close"
+    );
+    const chatbot = document.querySelector(".canarias-chatbot");
+    const chatbotInput = document.getElementById("chatbot-input");
+    const chatbotClose = document.querySelector(".canarias-chatbot-close");
+
+    const btns = document.querySelectorAll(".canarias-chatbot-btns button");
+
+    btns.forEach((btn, index) => {
+      console.log(`Botón ${index + 1}:`, btn);
+
+      // Ejemplo: agregar un evento click a cada botón
+      btn.addEventListener("click", (e) => {
+        let query = e.target.textContent.trim();
+        if (query) {
+          addMessage(query, true);
+          chatbotInput.value = "";
+          sendMessage(query);
+        }
+      });
+    });
+
+    // Event listener for input
+    chatbotInput.addEventListener("keyup", function (event) {
+      if (event.key === "Enter" || event.keyCode === 13) {
+        const query = chatbotInput.value.trim();
+        if (query) {
+          addMessage(query, true);
+          chatbotInput.value = "";
+          sendMessage(query);
+        }
+      }
+    });
+
+    chatbotCloseOverlay.addEventListener("click", function (e) {
+      e.stopPropagation();
+      chatbotText.style.display = "none";
+    });
+
+    // Event listener for chatbot toggle
+    chatbotOverlay.addEventListener("click", function () {
+      chatbot.style.display =
+        chatbot.style.display === "none" || chatbot.style.display === ""
+          ? "flex"
+          : "none";
+    });
+
+    // Event listener for close button
+    chatbotClose.addEventListener("click", function () {
+      chatbot.style.display = "none";
+    });
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+init();
+
+const convertUrlsToLinks = (text) => {
+  // Expresión regular para detectar URLs
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+
+  return text.split(urlRegex).map((part) => {
+    if (part.match(urlRegex)) {
+      return (
+        "<a href=" +
+        part +
+        ' target="_blank" rel="noopener noreferrer">' +
+        part +
+        "</a>"
+      );
+    }
+    return part;
+  });
+};
 
 // Function to add message to chat
 function addMessage(message, isUser = false) {
+  const chatbotBody = document.querySelector(".canarias-chatbot-body");
   const messageDiv = document.createElement("div");
   messageDiv.className = isUser
     ? "canarias-chatbot-msg user-msg"
@@ -569,6 +654,7 @@ function addMessage(message, isUser = false) {
 // Function to add slider to chat
 
 function addSlider(items) {
+  const chatbotBody = document.querySelector(".canarias-chatbot-body");
   const sliderDiv = document.createElement("div");
   sliderDiv.className = "canarias-chatbot-msg-system-msg";
 
@@ -621,33 +707,3 @@ async function sendMessage(query) {
     addMessage("Lo siento, hubo un error al procesar tu solicitud.");
   }
 }
-
-// Event listener for input
-chatbotInput.addEventListener("keyup", function (event) {
-  if (event.key === "Enter" || event.keyCode === 13) {
-    const query = chatbotInput.value.trim();
-    if (query) {
-      addMessage(query, true);
-      chatbotInput.value = "";
-      sendMessage(query);
-    }
-  }
-});
-
-chatbotCloseOverlay.addEventListener("click", function (e) {
-  e.stopPropagation();
-  chatbotText.style.display = "none";
-});
-
-// Event listener for chatbot toggle
-chatbotOverlay.addEventListener("click", function () {
-  chatbot.style.display =
-    chatbot.style.display === "none" || chatbot.style.display === ""
-      ? "flex"
-      : "none";
-});
-
-// Event listener for close button
-chatbotClose.addEventListener("click", function () {
-  chatbot.style.display = "none";
-});
