@@ -314,7 +314,7 @@ style.textContent = `
     }
 
     .canarias-chatbot-msg-system-msg .canarias-chatbot-msg::before {
-      content: url("/img/arrow_w.svg");
+      content: url("https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/arrow_w.svg");
       left: -11px;
       position: absolute;
       bottom: 5px;
@@ -409,7 +409,7 @@ const chatbotHTML = `
     <div class="canarias-chatbot-overlay">
       <div class="canarias-chatbot-overlay-text">
         <div class="canarias-chatbot-overlay-close">
-          <img src="/img/close.svg" alt="close" />
+          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/close.svg" alt="close" />
         </div>
         <div class="canarias-chatbot-desc">
           <p>
@@ -418,13 +418,13 @@ const chatbotHTML = `
             necesites sobre la isla. ¿En qué puedo ser de ayuda?
           </p>
         </div>
-        <img class="triangule" src="/img/arrow_white.svg" alt="arrow" />
+        <img class="triangule" src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/arrow_white.svg" alt="arrow" />
       </div>
       <div class="canarias-chatbot-has-message">
         <span>1</span>
       </div>
       <div class="canarias-chatbot-img">
-        <img src="/img/bot.svg" alt="user" />
+        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
       </div>
     </div>
     <div class="canarias-chatbot">
@@ -475,7 +475,7 @@ const chatbotHTML = `
         <div class="canarias-chatbot-msg canarias-chatbot-initial">
           <div class="canarias-chatbot-text">
             <div class="canarias-chatbot-img">
-              <img src="/img/bot.svg" alt="user" />
+              <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
             </div>
             <p>
               Hola, soy Lucía, tu asistente virtual y compañera en tu aventura
@@ -552,7 +552,7 @@ function addMessage(message, isUser = false) {
   } else {
     messageDiv.innerHTML = `
       <div class="canarias-chatbot-mg-img">
-        <img src="/img/bot.svg" alt="user" />
+        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
       </div>
       <div class="canarias-chatbot-msg">
         <div class="canarias-chatbot-text">
@@ -592,7 +592,7 @@ function addSlider(items) {
 
   sliderDiv.innerHTML = `
       <div class="canarias-chatbot-mg-img">
-        <img src="/img/bot.svg" alt="user" />
+        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
       </div>
       <div class="canarias-chatbot-slider">
         <div class="canarias-chatbot-slider-track">
