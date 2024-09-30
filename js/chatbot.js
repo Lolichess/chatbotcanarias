@@ -680,7 +680,7 @@ function addSlider(items) {
 
   sliderDiv.innerHTML = `
       <div class="canarias-chatbot-mg-img">
-        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
+        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.1/img/bot.svg" alt="user" />
       </div>
       <div class="canarias-chatbot-slider">
         <div class="canarias-chatbot-slider-track">
