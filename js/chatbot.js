@@ -234,6 +234,8 @@ style.textContent = `
       border-radius: 99px;
       border: 1px solid var(--Borders-grey-border, #cbd5e1);
       object-fit: cover;
+      width: 64px;
+      height: 64px;
     }
 
     .canarias-chatbot-has-message {
@@ -701,7 +703,9 @@ async function sendMessage(query) {
     const parsedResponse = JSON.parse(data.response.result);
 
     addMessage(parsedResponse.explicacion);
-    addSlider(parsedResponse.sitios_turisticos);
+    if (parsedResponse.sitios_turisticos.length > 0) {
+      addSlider(parsedResponse.sitios_turisticos);
+    }
   } catch (error) {
     console.error("Error:", error);
     addMessage("Lo siento, hubo un error al procesar tu solicitud.");
