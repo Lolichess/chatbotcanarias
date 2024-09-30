@@ -444,7 +444,7 @@ async function init() {
     <span>1</span>
   </div>
   <div class="canarias-chatbot-img">
-    <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
+    <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
   </div>
 </div>
 <div class="canarias-chatbot">
@@ -495,7 +495,7 @@ async function init() {
     <div class="canarias-chatbot-msg canarias-chatbot-initial">
       <div class="canarias-chatbot-text">
         <div class="canarias-chatbot-img">
-          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
+          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
         </div>
         <p>
            ` +
@@ -639,7 +639,7 @@ function addMessage(message, isUser = false) {
   } else {
     messageDiv.innerHTML = `
       <div class="canarias-chatbot-mg-img">
-        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.0/img/bot.svg" alt="user" />
+        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
       </div>
       <div class="canarias-chatbot-msg">
         <div class="canarias-chatbot-text">
