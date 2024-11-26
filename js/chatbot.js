@@ -330,7 +330,6 @@ style.textContent = `
       width: 336px;
       -ms-overflow-style: none;
       scrollbar-width: none;
-      overflow-x: scroll;
     }
 
     .canarias-chatbot-slider-item {
@@ -402,6 +401,23 @@ style.textContent = `
       height: 115px;
       border-radius: 4px;
       object-fit: cover;
+    }
+
+    .canarias-chatbot-slider-btn{
+      border: 0;
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      background: no-repeat;
+      cursor: pointer;
+    }
+
+    .canarias-chatbot-slider-title{
+      min-height:40px;
+    }
+
+    .canarias-chatbot-slider{
+      position: relative;
     }
 `;
 document.head.appendChild(style);
@@ -623,20 +639,16 @@ const convertUrlsToLinks = (text) => {
 };
 
 // Function to add message to chat
-function addMessage(message, isUser = false) {
+function addMessage(message, isUser = false, thinking = false) {
   const chatbotBody = document.querySelector(".canarias-chatbot-body");
   const messageDiv = document.createElement("div");
-  messageDiv.className = isUser
-    ? "canarias-chatbot-msg user-msg"
-    : "canarias-chatbot-msg-system-msg";
 
-  if (isUser) {
-    messageDiv.innerHTML = `
-      <div class="canarias-chatbot-text">
-        <p>${message}</p>
-      </div>
-    `;
-  } else {
+  messageDiv.className = isUser
+    ? "canarias-chatbot-msg user-msg " + (thinking === true ? "thinking" : "")
+    : "canarias-chatbot-msg-system-msg " +
+      (thinking === true ? "thinking" : "");
+
+  if (thinking) {
     messageDiv.innerHTML = `
       <div class="canarias-chatbot-mg-img">
         <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
@@ -647,6 +659,28 @@ function addMessage(message, isUser = false) {
         </div>
       </div>
     `;
+  } else {
+    const elementos = document.querySelectorAll(".thinking");
+    elementos.forEach((elemento) => elemento.remove());
+    if (isUser) {
+      messageDiv.innerHTML = `
+        <div class="canarias-chatbot-text">
+          <p>${message}</p>
+        </div>
+      `;
+    } else {
+      messageDiv.innerHTML = `
+        <div class="canarias-chatbot-mg-img">
+          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+        </div>
+        <div class="canarias-chatbot-msg">
+          <div class="canarias-chatbot-text">
+            <p>${message}</p>
+            
+          </div>
+        </div>
+      `;
+    }
   }
 
   chatbotBody.appendChild(messageDiv);
@@ -659,8 +693,11 @@ function addSlider(items) {
   const chatbotBody = document.querySelector(".canarias-chatbot-body");
   const sliderDiv = document.createElement("div");
   sliderDiv.className = "canarias-chatbot-msg-system-msg";
-
   let itemsHTML = "";
+
+  let btnHTML =
+    '<button class="canarias-chatbot-slider-btn next-btn"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#3A68B1"/> <path d="M23.0955 20.0001L16.191 26.8907C16.1304 26.951 16.0824 27.0226 16.0496 27.1015C16.0169 27.1803 16 27.2649 16 27.3503C16 27.4358 16.0169 27.5203 16.0496 27.5992C16.0824 27.6781 16.1304 27.7497 16.191 27.81C16.445 28.0633 16.8576 28.0633 17.111 27.81L24.4762 20.4595C24.5366 20.3992 24.5846 20.3276 24.6173 20.2488C24.65 20.17 24.6668 20.0855 24.6668 20.0001C24.6668 19.9148 24.65 19.8303 24.6173 19.7515C24.5846 19.6727 24.5366 19.6011 24.4762 19.5408L17.1116 12.1903C16.9894 12.0684 16.8239 12 16.6513 12C16.4787 12 16.3132 12.0684 16.191 12.1903C16.1304 12.2505 16.0824 12.3222 16.0496 12.401C16.0169 12.4799 16 12.5645 16 12.6499C16 12.7353 16.0169 12.8199 16.0496 12.8988C16.0824 12.9777 16.1304 13.0493 16.191 13.1096L23.0955 20.0001Z" fill="white"/></svg></button>';
+
   items.forEach((item) => {
     itemsHTML += `
         <div class="canarias-chatbot-slider-item">
@@ -672,39 +709,102 @@ function addSlider(items) {
               <h3>${item.titulo}</h3>
             </div>
             <p>${item.descripcion}</p>
+    
           </div>
-          <a href="#">Ver más</a>
+          <a href="${item.url}" target="_blank">Ver más</a>
         </div>
       `;
   });
 
-  sliderDiv.innerHTML = `
-      <div class="canarias-chatbot-mg-img">
-        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+  if (items.length > 1) {
+    sliderDiv.innerHTML = `
+    <div class="canarias-chatbot-mg-img">
+      <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+    </div>
+    <div class="canarias-chatbot-slider">
+      <div class="canarias-chatbot-slider-track">
+        ${itemsHTML}
       </div>
-      <div class="canarias-chatbot-slider">
-        <div class="canarias-chatbot-slider-track">
-          ${itemsHTML}
-        </div>
+      ${btnHTML}
+    </div>
+  `;
+
+    chatbotBody.appendChild(sliderDiv);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+
+    // Lógica del movimiento del slider
+    const track = sliderDiv.querySelector(".canarias-chatbot-slider-track");
+    const nextBtn = sliderDiv.querySelector(".next-btn");
+    const itemWidth = track.querySelector(
+      ".canarias-chatbot-slider-item"
+    ).offsetWidth;
+
+    let currentIndex = 0;
+
+    nextBtn.addEventListener("click", () => {
+      const totalItems = items.length;
+      currentIndex = (currentIndex + 1) % totalItems; // Mover al siguiente ítem
+      const scrollPosition = currentIndex * itemWidth;
+
+      // Animar el slider (puedes usar transform para mayor fluidez)
+      track.style.transform = `translateX(-${scrollPosition}px)`;
+      track.style.transition = "transform 0.3s ease-in-out";
+    });
+  } else {
+    sliderDiv.innerHTML = `
+    <div class="canarias-chatbot-mg-img">
+      <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+    </div>
+    <div class="canarias-chatbot-slider">
+      <div class="canarias-chatbot-slider-track">
+        ${itemsHTML}
       </div>
+    </div>
     `;
 
-  chatbotBody.appendChild(sliderDiv);
-  chatbotBody.scrollTop = chatbotBody.scrollHeight;
+    chatbotBody.appendChild(sliderDiv);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+  }
+}
+
+function isValidJSON(str) {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 // Function to send message to backend
 async function sendMessage(query) {
+  addMessage("Escribiendo respuesta...", false, true);
   try {
     const response = await fetch(
       `http://67.207.80.190:4000/chat?query=${encodeURIComponent(query)}`
     );
     const data = await response.json();
-    const parsedResponse = JSON.parse(data.response.result);
+
+    console.log(isValidJSON(data.response));
+
+    if (!isValidJSON(data.response)) {
+      addMessage(data.response);
+      return;
+    }
+    const parsedResponse = JSON.parse(data.response);
+
+    console.log(parsedResponse);
 
     addMessage(parsedResponse.explicacion);
-    if (parsedResponse.sitios_turisticos.length > 0) {
-      addSlider(parsedResponse.sitios_turisticos);
+    if (parsedResponse.formato === "Normal") {
+      if (parsedResponse.informacion !== "")
+        addMessage(parsedResponse.informacion);
+    } else {
+      if (parsedResponse.formato === "Cards") {
+        addSlider(parsedResponse.sitios_turisticos);
+      } else {
+        addMessage(parsedResponse);
+      }
     }
   } catch (error) {
     console.error("Error:", error);
