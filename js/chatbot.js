@@ -419,6 +419,10 @@ style.textContent = `
     .canarias-chatbot-slider{
       position: relative;
     }
+
+    .canarias-chatbot-slider-img{
+      width: 100%;  
+    }
 `;
 document.head.appendChild(style);
 
@@ -702,7 +706,7 @@ function addSlider(items) {
     itemsHTML += `
         <div class="canarias-chatbot-slider-item">
           <div class="canarias-chatbot-slider-img">
-            <img src="${item.imagen}" alt="user" />
+            <img src="${item.imagen}" onerror="this.src='https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.6/img/error.png'" alt="user" />
           </div>
           <div class="canarias-chatbot-slider-text">
             <div class="canarias-chatbot-slider-title">
