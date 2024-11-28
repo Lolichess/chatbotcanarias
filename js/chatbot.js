@@ -116,6 +116,13 @@ style.textContent = `
       font-weight: 400;
       line-height: normal;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .canarias-chatbot-text ul{
+      padding-left: 20px;
     }
 
     .canarias-chatbot-img {
