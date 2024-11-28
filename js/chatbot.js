@@ -125,6 +125,10 @@ style.textContent = `
       padding-left: 20px;
     }
 
+    .canarias-chatbot-text ul li{
+      margin-bottom: 8px;
+    }
+
     .canarias-chatbot-img {
       margin-top: -70px;
       text-align: center;
