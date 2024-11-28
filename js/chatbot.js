@@ -789,21 +789,16 @@ async function sendMessage(query) {
     );
     const data = await response.json();
 
-    console.log(isValidJSON(data.response));
-
     if (!isValidJSON(data.response)) {
       addMessage(data.response);
       return;
     }
     const parsedResponse = JSON.parse(data.response);
 
-    console.log(parsedResponse);
-
-    addMessage(parsedResponse.explicacion);
     if (parsedResponse.formato === "Normal") {
-      if (parsedResponse.informacion !== "")
-        addMessage(parsedResponse.informacion);
+      addMessage(parsedResponse.respuesta);
     } else {
+      addMessage(parsedResponse.explicacion);
       if (parsedResponse.formato === "Cards") {
         addSlider(parsedResponse.sitios_turisticos);
       } else {
