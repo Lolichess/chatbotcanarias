@@ -439,7 +439,27 @@ document.head.appendChild(style);
 
 async function init() {
   try {
-    const response = await fetch(`http://67.207.80.190:2000/api/assistant`);
+    let idioma = document.documentElement.lang || "spanish";
+
+    if (idioma == "en") {
+      idioma = "english";
+    } else {
+      if (idioma == "it") {
+        idioma = "italian";
+      } else {
+        if (idioma == "fr") {
+          idioma = "french";
+        } else {
+          idioma = "spanish";
+        }
+      }
+    }
+
+    console.log(idioma);
+
+    const response = await fetch(
+      `http://67.207.80.190:2000/api/assistant?idioma=${idioma}`
+    );
     const data = await response.json();
 
     let btnsText = "";
