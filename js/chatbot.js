@@ -458,7 +458,7 @@ async function init() {
     console.log(idioma);
 
     const response = await fetch(
-      `http://67.207.80.190:2000/api/assistant?idioma=${idioma}`
+      `http://inboundlabshispanic.com:2000/api/assistant?idioma=${idioma}`
     );
     const data = await response.json();
 
@@ -816,7 +816,9 @@ async function sendMessage(query) {
   addMessage("Escribiendo respuesta...", false, true);
   try {
     const response = await fetch(
-      `http://67.207.80.190:4000/chat?query=${encodeURIComponent(query)}`
+      `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
+        query
+      )}`
     );
     const data = await response.json();
 
