@@ -458,7 +458,7 @@ async function init() {
     console.log(idioma);
 
     const response = await fetch(
-      `http://inboundlabshispanic.com:2000/api/assistant?idioma=${idioma}`
+      `https://inboundlabshispanic.com:2000/api/assistant?idioma=${idioma}`
     );
     const data = await response.json();
 
