@@ -813,7 +813,22 @@ function isValidJSON(str) {
 
 // Function to send message to backend
 async function sendMessage(query) {
-  addMessage("Escribiendo respuesta...", false, true);
+  let idioma = document.documentElement.lang || "spanish";
+
+  if (idioma == "en") {
+    addMessage("Writing a response...", false, true);
+  } else {
+    if (idioma == "it") {
+      addMessage("Scrivendo una risposta...", false, true);
+    } else {
+      if (idioma == "fr") {
+        addMessage("En train d'écrire une réponse...", false, true);
+      } else {
+        addMessage("Escribiendo respuesta...", false, true);
+      }
+    }
+  }
+
   try {
     const response = await fetch(
       `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
