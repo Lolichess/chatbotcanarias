@@ -434,6 +434,29 @@ style.textContent = `
     .canarias-chatbot-slider-img{
       width: 100%;  
     }
+
+    .canarias-chatbot-input button {
+      border: 0;
+      cursor: pointer;
+      background:none;
+    }
+
+    .canarias-chatbot-input svg.recording path {
+      fill: #c81717;
+    }
+
+    .canarias-chatbot-text audio{
+      width:275px;
+    }
+
+    .input-recording{
+      color: var(--Icons-icon-error, #C21F1F)!important;
+      text-align: center!important;
+      font-size: 16px!important;
+      font-style: normal!important;
+      font-weight: 700!important;
+      line-height: normal!important;
+    }
 `;
 document.head.appendChild(style);
 
@@ -454,8 +477,6 @@ async function init() {
         }
       }
     }
-
-    console.log(idioma);
 
     const response = await fetch(
       `https://inboundlabshispanic.com:2000/api/assistant?idioma=${idioma}`
@@ -572,18 +593,21 @@ async function init() {
   </div>
   <div class="canarias-chatbot-input">
     <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje..." />
+    <button id="grabar" onclick="startRecording()">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="33"
       height="32"
       viewBox="0 0 33 32"
       fill="none"
+      class="microfono"
     >
       <path
         d="M16.5 21.3333C19.4413 21.3333 21.8333 18.94 21.8333 16V8C21.8333 5.05867 19.4413 2.66667 16.5 2.66667C13.5586 2.66667 11.1666 5.05867 11.1666 8V16C11.1666 18.94 13.5586 21.3333 16.5 21.3333ZM25.8333 16V13.3333C25.8333 12.9797 25.6928 12.6406 25.4428 12.3905C25.1927 12.1405 24.8536 12 24.5 12C24.1463 12 23.8072 12.1405 23.5571 12.3905C23.3071 12.6406 23.1666 12.9797 23.1666 13.3333V16C23.1666 19.676 20.176 22.6667 16.5 22.6667C12.824 22.6667 9.83329 19.676 9.83329 16V13.3333C9.83329 12.9797 9.69282 12.6406 9.44277 12.3905C9.19272 12.1405 8.85358 12 8.49996 12C8.14634 12 7.8072 12.1405 7.55715 12.3905C7.3071 12.6406 7.16663 12.9797 7.16663 13.3333V16C7.16663 20.6933 10.6506 24.576 15.1666 25.2267V26.6667H11.1666C10.813 26.6667 10.4739 26.8071 10.2238 27.0572C9.97377 27.3072 9.83329 27.6464 9.83329 28C9.83329 28.3536 9.97377 28.6928 10.2238 28.9428C10.4739 29.1929 10.813 29.3333 11.1666 29.3333H21.8333C22.1869 29.3333 22.5261 29.1929 22.7761 28.9428C23.0262 28.6928 23.1666 28.3536 23.1666 28C23.1666 27.6464 23.0262 27.3072 22.7761 27.0572C22.5261 26.8071 22.1869 26.6667 21.8333 26.6667H17.8333V25.2267C22.3493 24.576 25.8333 20.6933 25.8333 16Z"
         fill="#3A68B1"
       />
     </svg>
+    </button>
   </div>
 </div>
 `;
@@ -655,6 +679,10 @@ async function init() {
 
 init();
 
+let isRecording = false;
+let mediaRecorder;
+let audioChunks = [];
+
 const convertUrlsToLinks = (text) => {
   // Expresión regular para detectar URLs
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -672,6 +700,180 @@ const convertUrlsToLinks = (text) => {
     return part;
   });
 };
+
+let timer; // Variable para el temporizador
+let countdown = 15; // Tiempo inicial en segundos
+
+async function startRecording() {
+  if (!isRecording) {
+    let microfono = document.querySelector(".microfono");
+    microfono.classList.add("recording");
+    isRecording = true;
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+
+    let input_chat = document.querySelector("#chatbot-input");
+    input_chat.classList.add("input-recording");
+    input_chat.disabled = true;
+
+    // Mostrar "Recording..." y el temporizador
+    countdown = 15;
+    input_chat.value = `Recording... 0:${
+      countdown < 10 ? "0" + countdown : countdown
+    }`;
+
+    // Iniciar el temporizador decreciente
+    timer = setInterval(() => {
+      countdown--;
+      input_chat.value = `Recording... 0:${
+        countdown < 10 ? "0" + countdown : countdown
+      }`;
+      if (countdown <= 0) {
+        stopRecording(); // Detener la grabación al llegar a 0
+      }
+    }, 1000);
+
+    // Capturar datos de audio
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      // Limpiar el temporizador
+      clearInterval(timer);
+
+      // Crear archivo Blob de audio
+      const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+
+      // Crear elemento de audio y anexarlo al div
+      const audioURL = URL.createObjectURL(audioBlob);
+      const audioElement = document.createElement("audio");
+      audioElement.src = audioURL;
+      audioElement.controls = true;
+
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "canarias-chatbot-msg user-msg";
+
+      messageDiv.innerHTML = `
+      <div class="canarias-chatbot-msg">
+        <div class="canarias-chatbot-text"></div>
+      </div>
+    `;
+
+      // Seleccionar el contenedor donde irá el reproductor
+      const textContainer = messageDiv.querySelector(".canarias-chatbot-text");
+
+      // Agregar el reproductor de audio al contenedor
+      textContainer.appendChild(audioElement);
+
+      // Agregar el mensaje al cuerpo del chatbot
+      const chatbotBody = document.querySelector(".canarias-chatbot-body");
+      chatbotBody.appendChild(messageDiv);
+      chatbotBody.scrollTop = chatbotBody.scrollHeight;
+
+      // Enviar archivo al servidor Flask
+      sendAudioToServer(audioBlob);
+
+      // Limpiar datos
+      audioChunks = [];
+    };
+
+    mediaRecorder.start();
+  } else {
+    stopRecording();
+  }
+}
+
+function stopRecording() {
+  let microfono = document.querySelector(".microfono");
+  microfono.classList.remove("recording");
+  let input_chat = document.querySelector("#chatbot-input");
+
+  input_chat.disabled = false;
+  input_chat.value = "";
+  input_chat.classList.remove("input-recording");
+
+  isRecording = false;
+
+  console.log("Deteniendo grabación...");
+  mediaRecorder.stop();
+
+  // Limpiar el temporizador si sigue activo
+  clearInterval(timer);
+}
+
+async function sendAudioToServer(audioBlob) {
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "recording.wav");
+
+  let idioma = document.documentElement.lang || "spanish";
+
+  if (idioma == "en") {
+    addMessage("Writing a response...", false, true);
+  } else {
+    if (idioma == "it") {
+      addMessage("Scrivendo una risposta...", false, true);
+    } else {
+      if (idioma == "fr") {
+        addMessage("En train d'écrire une réponse...", false, true);
+      } else {
+        addMessage("Escribiendo respuesta...", false, true);
+      }
+    }
+  }
+
+  try {
+    const response = await fetch("https://inboundlabshispanic.com:4001/audio", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (response.ok) {
+      const elementos = document.querySelectorAll(".thinking");
+      elementos.forEach((elemento) => elemento.remove());
+      console.log("Audio enviado exitosamente");
+
+      // Insertar el audio en el contenedor y reproducirlo
+      const audioBlob = await response.blob();
+      const audioURL = URL.createObjectURL(audioBlob);
+
+      const messageDiv = document.createElement("div");
+
+      messageDiv.className = "canarias-chatbot-msg-system-msg";
+
+      // Crea un elemento <audio> y configúralo
+      const audioElement = document.createElement("audio");
+      audioElement.src = audioURL;
+      audioElement.controls = true; // Habilita los controles (play, pause, etc.)
+
+      messageDiv.innerHTML = `
+      <div class="canarias-chatbot-mg-img">
+        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+      </div>
+      <div class="canarias-chatbot-msg">
+        <div class="canarias-chatbot-text"></div>
+      </div>
+    `;
+
+      // Seleccionar el contenedor donde irá el reproductor
+      const textContainer = messageDiv.querySelector(".canarias-chatbot-text");
+
+      // Agregar el reproductor de audio al contenedor
+      textContainer.appendChild(audioElement);
+
+      // Agregar el mensaje al cuerpo del chatbot
+      const chatbotBody = document.querySelector(".canarias-chatbot-body");
+      chatbotBody.appendChild(messageDiv);
+      chatbotBody.scrollTop = chatbotBody.scrollHeight;
+    } else {
+      const elementos = document.querySelectorAll(".thinking");
+      elementos.forEach((elemento) => elemento.remove());
+      addMessage("Lo siento, hubo un error al procesar tu solicitud.");
+    }
+  } catch (error) {
+    console.error("Error de red:", error);
+  }
+}
 
 // Function to add message to chat
 function addMessage(message, isUser = false, thinking = false) {
