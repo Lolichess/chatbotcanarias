@@ -22,6 +22,7 @@ style.textContent = `
       bottom: 20px;
       right: 0px;
       display: none;
+      z-index: 99999;
     }
 
     .canarias-chatbot-header {
@@ -194,6 +195,7 @@ style.textContent = `
       position: fixed;
       bottom: 32px;
       right: 32px;
+      z-index:9999;
     }
 
     .canarias-chatbot-overlay-text {
