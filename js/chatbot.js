@@ -674,11 +674,12 @@ async function init() {
     chatbotClose.addEventListener("click", function () {
       chatbot.style.display = "none";
     });
+
+    loadMessages();
   } catch (error) {
     console.error("Error:", error);
   }
 }
-
 init();
 
 let isRecording = false;
@@ -808,6 +809,25 @@ async function sendAudioToServer(audioBlob) {
   const formData = new FormData();
   formData.append("audio", audioBlob, "recording.wav");
 
+  const storedAudios = JSON.parse(localStorage.getItem("chatbot-msg")) || {
+    messages: [],
+    timestamp: null,
+  };
+
+  const audioBase64Info = await blobToBase64(audioBlob);
+
+  storedAudios.messages.push({
+    audio: audioBase64Info,
+    isUser: true,
+  });
+
+  if (storedAudios.timestamp === null) {
+    const timestamp = new Date().getTime();
+    storedAudios.timestamp = timestamp;
+  }
+
+  localStorage.setItem("chatbot-msg", JSON.stringify(storedAudios));
+
   let idioma = document.documentElement.lang || "spanish";
 
   if (idioma == "en") {
@@ -835,8 +855,27 @@ async function sendAudioToServer(audioBlob) {
       elementos.forEach((elemento) => elemento.remove());
       console.log("Audio enviado exitosamente");
 
+      const data = await response.json();
+
+      const message = data.message;
+
+      const audioBase64Res = data.audio;
+
       // Insertar el audio en el contenedor y reproducirlo
-      const audioBlob = await response.blob();
+      //const audioBlob = await response.blob();
+
+      const audioBlob = base64ToBlob(audioBase64Res, data.mimetype);
+
+      //const audioBase64 = await blobToBase64(audioBase64Res);
+
+      storedAudios.messages.push({
+        audio: audioBase64Res,
+        message: message,
+        isUser: false,
+      });
+
+      localStorage.setItem("chatbot-msg", JSON.stringify(storedAudios));
+
       const audioURL = URL.createObjectURL(audioBlob);
 
       const messageDiv = document.createElement("div");
@@ -853,7 +892,7 @@ async function sendAudioToServer(audioBlob) {
         <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
       </div>
       <div class="canarias-chatbot-msg">
-        <div class="canarias-chatbot-text"></div>
+        <div class="canarias-chatbot-text">${message}</div>
       </div>
     `;
 
@@ -877,8 +916,83 @@ async function sendAudioToServer(audioBlob) {
   }
 }
 
+function base64ToBlob(base64, mimetype) {
+  const byteCharacters = atob(base64);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: mimetype });
+}
+
 // Function to add message to chat
 function addMessage(message, isUser = false, thinking = false) {
+  const chatbotBody = document.querySelector(".canarias-chatbot-body");
+  const messageDiv = document.createElement("div");
+
+  const timestamp = new Date().getTime(); // Timestamp actual
+  const storageKey = "chatbot-msg";
+
+  // Comprobar si hay un timestamp en localStorage
+  const storedData = JSON.parse(localStorage.getItem(storageKey)) || {
+    messages: [],
+    timestamp: timestamp,
+  };
+
+  messageDiv.className = isUser
+    ? "canarias-chatbot-msg user-msg " + (thinking === true ? "thinking" : "")
+    : "canarias-chatbot-msg-system-msg " +
+      (thinking === true ? "thinking" : "");
+
+  if (thinking) {
+    messageDiv.innerHTML = `
+      <div class="canarias-chatbot-mg-img">
+        <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+      </div>
+      <div class="canarias-chatbot-msg">
+        <div class="canarias-chatbot-text">
+          <p>${message}</p>
+        </div>
+      </div>
+    `;
+  } else {
+    const elementos = document.querySelectorAll(".thinking");
+    elementos.forEach((elemento) => elemento.remove());
+    if (isUser) {
+      messageDiv.innerHTML = `
+        <div class="canarias-chatbot-text">
+          <p>${message}</p>
+        </div>
+      `;
+    } else {
+      messageDiv.innerHTML = `
+        <div class="canarias-chatbot-mg-img">
+          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+        </div>
+        <div class="canarias-chatbot-msg">
+          <div class="canarias-chatbot-text">
+            <p>${message}</p>
+            
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  if (!thinking) {
+    storedData.messages.push({ message: message, isUser: isUser });
+    if (storedData.timestamp === null) {
+      storedData.timestamp = timestamp;
+    }
+    localStorage.setItem(storageKey, JSON.stringify(storedData));
+  }
+
+  chatbotBody.appendChild(messageDiv);
+  chatbotBody.scrollTop = chatbotBody.scrollHeight;
+}
+
+function addMessageLoad(message, isUser = false, thinking = false) {
   const chatbotBody = document.querySelector(".canarias-chatbot-body");
   const messageDiv = document.createElement("div");
 
@@ -926,13 +1040,126 @@ function addMessage(message, isUser = false, thinking = false) {
   chatbotBody.scrollTop = chatbotBody.scrollHeight;
 }
 
+function loadMessages() {
+  const storageKey = "chatbot-msg";
+
+  const timestamp = new Date().getTime(); // Timestamp actual
+  const tenMinutesInMs = 10 * 60 * 1000;
+
+  const storedData = JSON.parse(localStorage.getItem(storageKey)) || {
+    messages: [],
+    timestamp: null,
+  };
+
+  localStorage.setItem(storageKey, JSON.stringify(storedData));
+
+  if (
+    storedData.timestamp &&
+    timestamp - storedData.timestamp > tenMinutesInMs
+  ) {
+    localStorage.removeItem(storageKey); // Limpiar mensajes si pasó el tiempo
+    storedData.messages = [];
+  } else {
+    if (storedData && storedData.messages) {
+      storedData.messages.forEach((msgData) => {
+        if (msgData.audio) {
+          loadStoredAudios(msgData.audio, msgData.message, msgData.isUser);
+        } else {
+          if (msgData.slider) {
+            addSlider(msgData.slider, true);
+          } else {
+            addMessageLoad(msgData.message, msgData.isUser);
+          }
+        }
+      });
+    }
+  }
+}
+
+function loadStoredAudios(audio, message, isUser) {
+  const messageDiv = document.createElement("div");
+
+  if (isUser) {
+    messageDiv.className = "canarias-chatbot-msg user-msg";
+
+    const audioElement = document.createElement("audio");
+    audioElement.src = `data:audio/wav;base64,${audio}`;
+    audioElement.controls = true;
+
+    messageDiv.innerHTML = `
+    <div class="canarias-chatbot-msg">
+      <div class="canarias-chatbot-text"></div>
+    </div>
+  `;
+
+    // Seleccionar el contenedor donde irá el reproductor
+    const textContainer = messageDiv.querySelector(".canarias-chatbot-text");
+
+    // Agregar el reproductor de audio al contenedor
+    textContainer.appendChild(audioElement);
+
+    // Agregar el mensaje al cuerpo del chatbot
+    const chatbotBody = document.querySelector(".canarias-chatbot-body");
+    chatbotBody.appendChild(messageDiv);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+  } else {
+    messageDiv.className = "canarias-chatbot-msg-system-msg";
+
+    const audioElement = document.createElement("audio");
+    audioElement.src = `data:audio/wav;base64,${audio}`;
+    audioElement.controls = true;
+
+    messageDiv.innerHTML = `
+        <div class="canarias-chatbot-mg-img">
+          <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
+        </div>
+        <div class="canarias-chatbot-msg">
+          <div class="canarias-chatbot-text">
+            <p> ${message}</p>
+          </div>
+        </div>
+      `;
+
+    const textContainer = messageDiv.querySelector(".canarias-chatbot-text");
+    textContainer.appendChild(audioElement);
+
+    const chatbotBody = document.querySelector(".canarias-chatbot-body");
+    chatbotBody.appendChild(messageDiv);
+
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(",")[1]);
+    reader.readAsDataURL(blob);
+  });
+}
+
 // Function to add slider to chat
 
-function addSlider(items) {
+function addSlider(items, loadMessages = false) {
   const chatbotBody = document.querySelector(".canarias-chatbot-body");
   const sliderDiv = document.createElement("div");
   sliderDiv.className = "canarias-chatbot-msg-system-msg";
   let itemsHTML = "";
+
+  if (!loadMessages) {
+    // Comprobar si hay un timestamp en localStorage
+    const storedData = JSON.parse(localStorage.getItem("chatbot-msg")) || {
+      messages: [],
+      timestamp: timestamp,
+    };
+
+    storedData.messages.push({
+      slider: items,
+      isUser: false,
+    });
+
+    localStorage.setItem("chatbot-msg", JSON.stringify(storedData));
+  }
 
   let btnHTML =
     '<button class="canarias-chatbot-slider-btn next-btn"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="20" fill="#3A68B1"/> <path d="M23.0955 20.0001L16.191 26.8907C16.1304 26.951 16.0824 27.0226 16.0496 27.1015C16.0169 27.1803 16 27.2649 16 27.3503C16 27.4358 16.0169 27.5203 16.0496 27.5992C16.0824 27.6781 16.1304 27.7497 16.191 27.81C16.445 28.0633 16.8576 28.0633 17.111 27.81L24.4762 20.4595C24.5366 20.3992 24.5846 20.3276 24.6173 20.2488C24.65 20.17 24.6668 20.0855 24.6668 20.0001C24.6668 19.9148 24.65 19.8303 24.6173 19.7515C24.5846 19.6727 24.5366 19.6011 24.4762 19.5408L17.1116 12.1903C16.9894 12.0684 16.8239 12 16.6513 12C16.4787 12 16.3132 12.0684 16.191 12.1903C16.1304 12.2505 16.0824 12.3222 16.0496 12.401C16.0169 12.4799 16 12.5645 16 12.6499C16 12.7353 16.0169 12.8199 16.0496 12.8988C16.0824 12.9777 16.1304 13.0493 16.191 13.1096L23.0955 20.0001Z" fill="white"/></svg></button>';
@@ -981,9 +1208,15 @@ function addSlider(items) {
     let currentIndex = 0;
 
     nextBtn.addEventListener("click", () => {
+      console.log("aaa");
+
       const totalItems = items.length;
       currentIndex = (currentIndex + 1) % totalItems; // Mover al siguiente ítem
-      const scrollPosition = currentIndex * itemWidth;
+      const scrollPosition = currentIndex * 236;
+
+      console.log(
+        totalItems + " " + currentIndex + " " + itemWidth + " " + scrollPosition
+      );
 
       // Animar el slider (puedes usar transform para mayor fluidez)
       track.style.transform = `translateX(-${scrollPosition}px)`;
