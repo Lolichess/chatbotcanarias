@@ -459,6 +459,15 @@ style.textContent = `
       font-weight: 700!important;
       line-height: normal!important;
     }
+
+    @media (min-width: 320px) and (max-width: 480px){
+      
+     .canarias-chatbot{
+        width: 100%;
+        height: 500px;
+     }
+
+    }
 `;
 document.head.appendChild(style);
 
@@ -524,26 +533,6 @@ async function init() {
 <div class="canarias-chatbot">
   <div class="canarias-chatbot-header">
     <div class="canarias-chatbot-dots">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="32"
-        height="32"
-        viewBox="0 0 32 32"
-        fill="none"
-      >
-        <path
-          d="M6.66667 13.3333C5.2 13.3333 4 14.5333 4 16C4 17.4667 5.2 18.6667 6.66667 18.6667C8.13333 18.6667 9.33333 17.4667 9.33333 16C9.33333 14.5333 8.13333 13.3333 6.66667 13.3333Z"
-          fill="white"
-        />
-        <path
-          d="M25.3334 13.3333C23.8667 13.3333 22.6667 14.5333 22.6667 16C22.6667 17.4667 23.8667 18.6667 25.3334 18.6667C26.8001 18.6667 28.0001 17.4667 28.0001 16C28.0001 14.5333 26.8001 13.3333 25.3334 13.3333Z"
-          fill="white"
-        />
-        <path
-          d="M15.9999 13.3333C14.5333 13.3333 13.3333 14.5333 13.3333 16C13.3333 17.4667 14.5333 18.6667 15.9999 18.6667C17.4666 18.6667 18.6666 17.4667 18.6666 16C18.6666 14.5333 17.4666 13.3333 15.9999 13.3333Z"
-          fill="white"
-        />
-      </svg>
     </div>
     <div>Asistente Virtual</div>
     <div class="canarias-chatbot-close">
@@ -681,6 +670,8 @@ async function init() {
   }
 }
 init();
+
+let quantityMessages = 1;
 
 let isRecording = false;
 let mediaRecorder;
@@ -844,50 +835,75 @@ async function sendAudioToServer(audioBlob) {
     }
   }
 
+  const timestamp = new Date().getTime(); // Timestamp actual
+  const tenMinutesInMs = 10 * 60 * 1000;
+
+  const storedData = JSON.parse(localStorage.getItem("chatbot-msg"));
+
+  if (
+    storedData.timestamp &&
+    timestamp - storedData.timestamp > tenMinutesInMs
+  ) {
+    storedData.quantityMessages = 1;
+    quantityMessages = 1;
+  } else {
+    quantityMessages = storedData.quantityMessages;
+    if (quantityMessages == null) quantityMessages = 1;
+  }
+
   try {
-    const response = await fetch("https://inboundlabshispanic.com:4001/audio", {
-      method: "POST",
-      body: formData,
-    });
+    if (quantityMessages <= 3) {
+      const response = await fetch(
+        "https://inboundlabshispanic.com:4001/audio",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-    if (response.ok) {
-      const elementos = document.querySelectorAll(".thinking");
-      elementos.forEach((elemento) => elemento.remove());
-      console.log("Audio enviado exitosamente");
+      if (response.ok) {
+        const elementos = document.querySelectorAll(".thinking");
+        elementos.forEach((elemento) => elemento.remove());
 
-      const data = await response.json();
+        const data = await response.json();
 
-      const message = data.message;
+        const message = data.message;
 
-      const audioBase64Res = data.audio;
+        const audioBase64Res = data.audio;
 
-      // Insertar el audio en el contenedor y reproducirlo
-      //const audioBlob = await response.blob();
+        // Insertar el audio en el contenedor y reproducirlo
+        //const audioBlob = await response.blob();
 
-      const audioBlob = base64ToBlob(audioBase64Res, data.mimetype);
+        const audioBlob = base64ToBlob(audioBase64Res, data.mimetype);
 
-      //const audioBase64 = await blobToBase64(audioBase64Res);
+        //const audioBase64 = await blobToBase64(audioBase64Res);
 
-      storedAudios.messages.push({
-        audio: audioBase64Res,
-        message: message,
-        isUser: false,
-      });
+        storedAudios.messages.push({
+          audio: audioBase64Res,
+          message: message,
+          isUser: false,
+        });
 
-      localStorage.setItem("chatbot-msg", JSON.stringify(storedAudios));
+        localStorage.setItem("chatbot-msg", JSON.stringify(storedAudios));
 
-      const audioURL = URL.createObjectURL(audioBlob);
+        const storedDataRes = JSON.parse(localStorage.getItem("chatbot-msg"));
 
-      const messageDiv = document.createElement("div");
+        storedDataRes.quantityMessages = quantityMessages + 1;
 
-      messageDiv.className = "canarias-chatbot-msg-system-msg";
+        localStorage.setItem("chatbot-msg", JSON.stringify(storedDataRes));
 
-      // Crea un elemento <audio> y configúralo
-      const audioElement = document.createElement("audio");
-      audioElement.src = audioURL;
-      audioElement.controls = true; // Habilita los controles (play, pause, etc.)
+        const audioURL = URL.createObjectURL(audioBlob);
 
-      messageDiv.innerHTML = `
+        const messageDiv = document.createElement("div");
+
+        messageDiv.className = "canarias-chatbot-msg-system-msg";
+
+        // Crea un elemento <audio> y configúralo
+        const audioElement = document.createElement("audio");
+        audioElement.src = audioURL;
+        audioElement.controls = true; // Habilita los controles (play, pause, etc.)
+
+        messageDiv.innerHTML = `
       <div class="canarias-chatbot-mg-img">
         <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
       </div>
@@ -896,20 +912,27 @@ async function sendAudioToServer(audioBlob) {
       </div>
     `;
 
-      // Seleccionar el contenedor donde irá el reproductor
-      const textContainer = messageDiv.querySelector(".canarias-chatbot-text");
+        // Seleccionar el contenedor donde irá el reproductor
+        const textContainer = messageDiv.querySelector(
+          ".canarias-chatbot-text"
+        );
 
-      // Agregar el reproductor de audio al contenedor
-      textContainer.appendChild(audioElement);
+        // Agregar el reproductor de audio al contenedor
+        textContainer.appendChild(audioElement);
 
-      // Agregar el mensaje al cuerpo del chatbot
-      const chatbotBody = document.querySelector(".canarias-chatbot-body");
-      chatbotBody.appendChild(messageDiv);
-      chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        // Agregar el mensaje al cuerpo del chatbot
+        const chatbotBody = document.querySelector(".canarias-chatbot-body");
+        chatbotBody.appendChild(messageDiv);
+        chatbotBody.scrollTop = chatbotBody.scrollHeight;
+      } else {
+        const elementos = document.querySelectorAll(".thinking");
+        elementos.forEach((elemento) => elemento.remove());
+        addMessage("Lo siento, hubo un error al procesar tu solicitud.");
+      }
     } else {
-      const elementos = document.querySelectorAll(".thinking");
-      elementos.forEach((elemento) => elemento.remove());
-      addMessage("Lo siento, hubo un error al procesar tu solicitud.");
+      addMessage(
+        "Lo siento, has excedido el límite de mensajes. Vuelve a intentarlo en unos minutos."
+      );
     }
   } catch (error) {
     console.error("Error de red:", error);
@@ -1267,28 +1290,67 @@ async function sendMessage(query) {
   }
 
   try {
-    const response = await fetch(
-      `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
-        query
-      )}`
-    );
-    const data = await response.json();
+    const timestamp = new Date().getTime(); // Timestamp actual
+    const tenMinutesInMs = 10 * 60 * 1000;
 
-    if (!isValidJSON(data.response)) {
-      addMessage(data.response);
-      return;
-    }
-    const parsedResponse = JSON.parse(data.response);
+    const storedData = JSON.parse(localStorage.getItem("chatbot-msg"));
 
-    if (parsedResponse.formato === "Normal") {
-      addMessage(parsedResponse.respuesta);
-    } else {
-      addMessage(parsedResponse.explicacion);
-      if (parsedResponse.formato === "Cards") {
-        addSlider(parsedResponse.sitios_turisticos);
+    if (storedData) {
+      if (
+        storedData.timestamp &&
+        timestamp - storedData.timestamp > tenMinutesInMs
+      ) {
+        storedData.quantityMessages = 1;
+        quantityMessages = 1;
       } else {
-        addMessage(parsedResponse);
+        quantityMessages = storedData.quantityMessages;
+        if (quantityMessages == null) quantityMessages = 1;
       }
+    } else {
+      localStorage.setItem(
+        "chatbot-msg",
+        JSON.stringify({
+          messages: [],
+          timestamp: timestamp,
+          quantityMessages: 1,
+        })
+      );
+
+      quantityMessages = 1;
+    }
+
+    if (quantityMessages <= 3) {
+      const response = await fetch(
+        `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
+          query
+        )}`
+      );
+      const data = await response.json();
+
+      storedData.quantityMessages = quantityMessages + 1;
+
+      localStorage.setItem("chatbot-msg", JSON.stringify(storedData));
+
+      if (!isValidJSON(data.response)) {
+        addMessage(data.response);
+        return;
+      }
+      const parsedResponse = JSON.parse(data.response);
+
+      if (parsedResponse.formato === "Normal") {
+        addMessage(parsedResponse.respuesta);
+      } else {
+        addMessage(parsedResponse.explicacion);
+        if (parsedResponse.formato === "Cards") {
+          addSlider(parsedResponse.sitios_turisticos);
+        } else {
+          addMessage(parsedResponse);
+        }
+      }
+    } else {
+      addMessage(
+        "Lo siento, has excedido el límite de mensajes. Vuelve a intentarlo en unos minutos."
+      );
     }
   } catch (error) {
     console.error("Error:", error);
