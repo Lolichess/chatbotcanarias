@@ -852,7 +852,7 @@ async function sendAudioToServer(audioBlob) {
   }
 
   try {
-    if (quantityMessages <= 3) {
+    if (quantityMessages <= 10) {
       const response = await fetch(
         "https://inboundlabshispanic.com:4001/audio",
         {
@@ -1319,7 +1319,7 @@ async function sendMessage(query) {
       quantityMessages = 1;
     }
 
-    if (quantityMessages <= 3) {
+    if (quantityMessages <= 10) {
       const response = await fetch(
         `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
           query
