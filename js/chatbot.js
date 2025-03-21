@@ -1271,6 +1271,10 @@ function isValidJSON(str) {
   }
 }
 
+function cleanJSON(jsonString) {
+  return jsonString.replace(/,\s*([\]}])/g, "$1"); // Elimina la coma antes de '}' o ']'
+}
+
 // Function to send message to backend
 async function sendMessage(query) {
   let idioma = document.documentElement.lang || "spanish";
@@ -1331,11 +1335,15 @@ async function sendMessage(query) {
 
       localStorage.setItem("chatbot-msg", JSON.stringify(storedData));
 
-      if (!isValidJSON(data.response)) {
-        addMessage(data.response);
+      console.log(data.response);
+
+      const cleanedStr = cleanJSON(data.response);
+
+      if (!isValidJSON(cleanedStr)) {
+        addMessage(cleanedStr);
         return;
       }
-      const parsedResponse = JSON.parse(data.response);
+      const parsedResponse = JSON.parse(cleanedStr);
 
       if (parsedResponse.formato === "Normal") {
         addMessage(parsedResponse.respuesta);
