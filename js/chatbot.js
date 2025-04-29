@@ -471,6 +471,11 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+if (!localStorage.getItem("session_id")) {
+  localStorage.setItem("session_id", crypto.randomUUID());
+}
+const session_id = localStorage.getItem("session_id");
+
 async function init() {
   try {
     let idioma = document.documentElement.lang || "spanish";
@@ -797,6 +802,7 @@ function stopRecording() {
 async function sendAudioToServer(audioBlob) {
   const formData = new FormData();
   formData.append("audio", audioBlob, "recording.wav");
+  formData.append("session_id", session_id);
 
   const storedAudios = JSON.parse(localStorage.getItem("chatbot-msg")) || {
     messages: [],
@@ -1319,7 +1325,7 @@ async function sendMessage(query) {
       const response = await fetch(
         `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
           query
-        )}`
+        )}&session_id=${session_id}`
       );
       const data = await response.json();
 
