@@ -621,8 +621,6 @@ async function init() {
     const btns = document.querySelectorAll(".canarias-chatbot-btns button");
 
     btns.forEach((btn, index) => {
-      console.log(`Botón ${index + 1}:`, btn);
-
       // Ejemplo: agregar un evento click a cada botón
       btn.addEventListener("click", (e) => {
         let query = e.target.textContent.trim();
@@ -1231,15 +1229,9 @@ function addSlider(items, loadMessages = false) {
     let currentIndex = 0;
 
     nextBtn.addEventListener("click", () => {
-      console.log("aaa");
-
       const totalItems = items.length;
       currentIndex = (currentIndex + 1) % totalItems; // Mover al siguiente ítem
       const scrollPosition = currentIndex * 236;
-
-      console.log(
-        totalItems + " " + currentIndex + " " + itemWidth + " " + scrollPosition
-      );
 
       // Animar el slider (puedes usar transform para mayor fluidez)
       track.style.transform = `translateX(-${scrollPosition}px)`;
@@ -1335,15 +1327,7 @@ async function sendMessage(query) {
 
       localStorage.setItem("chatbot-msg", JSON.stringify(storedData));
 
-      console.log(data.response);
-
-      const cleanedStr = cleanJSON(data.response);
-
-      if (!isValidJSON(cleanedStr)) {
-        addMessage(cleanedStr);
-        return;
-      }
-      const parsedResponse = JSON.parse(cleanedStr);
+      const parsedResponse = data.response;
 
       if (parsedResponse.formato === "Normal") {
         addMessage(parsedResponse.respuesta);
