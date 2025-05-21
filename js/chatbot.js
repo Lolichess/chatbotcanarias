@@ -365,6 +365,13 @@ style.textContent = `
       font-style: normal;
       font-weight: 700;
       line-height: normal;
+      text-transform: capitalize!important;
+    }
+
+    .canarias-chatbot-text h3{
+        font-size: 20px!important;
+        color: #33363c!important;
+        text-transform: capitalize!important;
     }
 
     .canarias-chatbot-slider-text p {
@@ -1093,7 +1100,7 @@ function loadMessages() {
           loadStoredAudios(msgData.audio, msgData.message, msgData.isUser);
         } else {
           if (msgData.slider) {
-            addSlider(msgData.slider, true);
+            addSlider(msgData.slider, true, msgData.Boton);
           } else {
             addMessageLoad(msgData.message, msgData.isUser);
           }
@@ -1167,7 +1174,7 @@ function blobToBase64(blob) {
 
 // Function to add slider to chat
 
-function addSlider(items, loadMessages = false) {
+function addSlider(items, loadMessages = false, messageButton = "Ver más") {
   const chatbotBody = document.querySelector(".canarias-chatbot-body");
   const sliderDiv = document.createElement("div");
   sliderDiv.className = "canarias-chatbot-msg-system-msg";
@@ -1183,6 +1190,7 @@ function addSlider(items, loadMessages = false) {
     storedData.messages.push({
       slider: items,
       isUser: false,
+      Boton: messageButton,
     });
 
     localStorage.setItem("chatbot-msg", JSON.stringify(storedData));
@@ -1204,7 +1212,7 @@ function addSlider(items, loadMessages = false) {
             <p>${item.descripcion}</p>
     
           </div>
-          <a href="${item.url}" target="_blank">Ver más</a>
+          <a href="${item.url}" target="_blank">${messageButton}</a>
         </div>
       `;
   });
@@ -1340,7 +1348,11 @@ async function sendMessage(query) {
       } else {
         addMessage(parsedResponse.explicacion);
         if (parsedResponse.formato === "Cards") {
-          addSlider(parsedResponse.sitios_turisticos);
+          addSlider(
+            parsedResponse.sitios_turisticos,
+            false,
+            parsedResponse.Boton
+          );
         } else {
           addMessage(parsedResponse);
         }
