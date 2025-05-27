@@ -847,7 +847,7 @@ async function sendAudioToServer(audioBlob) {
   }
 
   const timestamp = new Date().getTime(); // Timestamp actual
-  const tenMinutesInMs = 10 * 60 * 1000;
+  const tenMinutesInMs = 5 * 60 * 1000;
 
   const storedData = JSON.parse(localStorage.getItem("chatbot-msg"));
 
@@ -863,7 +863,7 @@ async function sendAudioToServer(audioBlob) {
   }
 
   try {
-    if (quantityMessages <= 10) {
+    if (quantityMessages <= 20) {
       const response = await fetch(
         "https://inboundlabshispanic.com:4001/audio",
         {
@@ -1078,7 +1078,7 @@ function loadMessages() {
   const storageKey = "chatbot-msg";
 
   const timestamp = new Date().getTime(); // Timestamp actual
-  const tenMinutesInMs = 10 * 60 * 1000;
+  const tenMinutesInMs = 5 * 60 * 1000;
 
   const storedData = JSON.parse(localStorage.getItem(storageKey)) || {
     messages: [],
@@ -1301,7 +1301,7 @@ async function sendMessage(query) {
 
   try {
     const timestamp = new Date().getTime(); // Timestamp actual
-    const tenMinutesInMs = 10 * 60 * 1000;
+    const tenMinutesInMs = 5 * 60 * 1000;
 
     const storedData = JSON.parse(localStorage.getItem("chatbot-msg"));
 
@@ -1329,7 +1329,7 @@ async function sendMessage(query) {
       quantityMessages = 1;
     }
 
-    if (quantityMessages <= 10) {
+    if (quantityMessages <= 20) {
       const response = await fetch(
         `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
           query
