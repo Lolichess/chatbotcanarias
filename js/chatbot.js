@@ -502,7 +502,7 @@ async function init() {
     }
 
     const response = await fetch(
-      `https://inboundlabshispanic.com:2000/api/assistant?idioma=${idioma}`
+      `https://inboundlabshispanic.com/api/assistant?idioma=${idioma}`
     );
     const data = await response.json();
 
