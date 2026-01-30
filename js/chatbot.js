@@ -880,6 +880,8 @@ async function sendAudioToServer(audioBlob) {
 
         const message = data.message;
 
+        const obj = JSON.parse(message);
+
         const audioBase64Res = data.audio;
 
         // Insertar el audio en el contenedor y reproducirlo
@@ -919,7 +921,7 @@ async function sendAudioToServer(audioBlob) {
         <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
       </div>
       <div class="canarias-chatbot-msg">
-        <div class="canarias-chatbot-text">${message}</div>
+        <div class="canarias-chatbot-text">${obj.respuesta}</div>
       </div>
     `;
 
