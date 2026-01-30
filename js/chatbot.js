@@ -865,7 +865,7 @@ async function sendAudioToServer(audioBlob) {
   try {
     if (quantityMessages <= 20) {
       const response = await fetch(
-        "https://inboundlabshispanic.com:4001/audio",
+        "https://inboundlabshispanic.com/audio",
         {
           method: "POST",
           body: formData,
@@ -1331,7 +1331,7 @@ async function sendMessage(query) {
 
     if (quantityMessages <= 20) {
       const response = await fetch(
-        `https://inboundlabshispanic.com:4000/chat?query=${encodeURIComponent(
+        `https://inboundlabshispanic.com/chat?query=${encodeURIComponent(
           query
         )}&session_id=${session_id}`
       );
