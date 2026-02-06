@@ -1145,13 +1145,15 @@ function loadStoredAudios(audio, message, isUser) {
     audioElement.src = `data:audio/wav;base64,${audio}`;
     audioElement.controls = true;
 
+    const obj = JSON.parse(message);
+
     messageDiv.innerHTML = `
         <div class="canarias-chatbot-mg-img">
           <img src="https://cdn.jsdelivr.net/gh/lolichess/chatbotcanarias@v1.0.3/img/bot.svg" alt="user" />
         </div>
         <div class="canarias-chatbot-msg">
           <div class="canarias-chatbot-text">
-            <p> ${message}</p>
+            <p> ${obj.respuesta}</p>
           </div>
         </div>
       `;
